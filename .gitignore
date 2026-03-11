@@ -1,0 +1,15 @@
+# python cache
+__pycache__/
+*.py[cod]
+
+# virtual environment
+venv/
+
+# django
+db.sqlite3
+
+# vscode
+.vscode/
+
+# OS files
+.DS_Store
