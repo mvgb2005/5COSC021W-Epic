@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html></html>
+<html>
 <head>
     <title>{% block title %}Sky Portal{% endblock %}</title>
 </head>
 <body>
     <nav>
-        <a href="/">Home</a>    
+        <a href="/">Home</a>
+        <a href="/teams/">Teams</a>
+        <a href="/organisation/">Organisation</a>    
         {% if user.is_authenticated %}
             <span>Welcome, {{ user.username }}!</span>
             <form action="/logout/" method="post" style="display: inline;">

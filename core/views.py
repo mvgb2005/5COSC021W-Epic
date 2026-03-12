@@ -26,3 +26,20 @@ def user_logout(request):
     if request.method == 'POST':
         logout(request)
     return redirect('/accounts/login/')
+
+@login_required
+@never_cache
+def teams(request):
+    return render(request, 'teams.html')
+
+@login_required
+@never_cache
+def team_detail(request, team_id):
+    return render(request, 'team_detail.html', {'team_id': team_id})
+
+@login_required
+@never_cache
+def organisation(request):
+    return render(request, 'organisation.html')
+
+
