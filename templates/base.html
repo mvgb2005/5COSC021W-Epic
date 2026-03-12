@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html></html>
+<head>
+    <title>{% block title %}Sky Portal{% endblock %}</title>
+</head>
+<body>
+    <nav>
+        <a href="/">Home</a>    
+
+        {% if request.path != '/account/login/' and request.path != '/account/signup/' %}
+            {% if user.is_authenticated %}
+                <span>Welcome, {{ user.username }}!</span>
+                <a href="/account/logout/">Logout</a>
+            {% else %}
+                <a href="/account/login/">Login</a>
+                <a href="/account/signup/">Sign Up</a>
+            {% endif %}
+        {% endif %}
+    </nav>
+
+    <hr>
+        {% block content %}
+        {% endblock %}
+</body>
+</html>
