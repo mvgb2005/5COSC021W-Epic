@@ -1,0 +1,401 @@
+<!-- Code updated for teams page-->
+/* RESET */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:"Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* BODY */
+
+
+body{
+background:#f4f6f9;
+line-height:1.6;
+color:#000;
+}
+
+
+/* NAVBAR */
+
+
+.navbar{
+background:#002b5c;
+color:white;
+padding:15px 40px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+
+/* LOGO + TITLE */
+
+
+.logo-area{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.logo-area img{
+height:40px;
+}
+
+.site-title{
+font-size:18px;
+font-weight:600;
+}
+
+
+/* NAV LINKS */
+
+
+.nav-links{
+display:flex;
+gap:20px;
+}
+
+.nav-links a{
+color:white;
+text-decoration:none;
+padding:6px 10px;
+border-radius:4px;
+transition:0.2s;
+}
+
+.nav-links a:hover,
+.nav-links a:focus{
+background:#0057b8;
+}
+
+
+/* LOGOUT BUTTON */
+
+
+.logout-btn{
+background:#ff4d4d;
+border:none;
+padding:8px 14px;
+border-radius:6px;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+.logout-btn:hover,
+.logout-btn:focus{
+background:#cc0000;
+}
+
+
+/* DASHBOARD */
+
+
+.dashboard{
+padding:40px;
+}
+
+.cards{
+display:flex;
+gap:20px;
+margin-top:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+flex:1;
+border-radius:12px;
+box-shadow:0 6px 16px rgba(0,0,0,0.08);
+text-align:center;
+transition:0.25s;
+}
+
+.card:hover{
+transform:translateY(-4px);
+box-shadow:0 10px 25px rgba(0,0,0,0.12);
+}
+
+
+/* PANELS */
+
+.section{
+display:flex;
+gap:20px;
+margin-top:30px;
+}
+
+.panel{
+background:white;
+padding:20px;
+flex:1;
+border-radius:12px;
+box-shadow:0 6px 16px rgba(0,0,0,0.08);
+}
+
+
+/* FORM PAGE */
+
+
+.form-page{
+display:flex;
+justify-content:center;
+align-items:flex-start;
+min-height:100vh;
+padding-top:40px;
+padding-bottom:40px;
+}
+
+/* FORM CONTAINER */
+
+
+.form-container{
+background:white;
+padding:35px;
+width:480px;
+border-radius:14px;
+box-shadow:0 10px 30px rgba(0,0,0,0.12);
+}
+
+
+/* LOGO + TITLE (FORM HEADER) */
+
+
+.form-logo{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+margin-bottom:8px;
+}
+
+.form-logo img{
+height:50px;
+}
+
+.form-logo h1{
+font-size:18px;
+font-weight:600;
+margin:0;
+}
+
+
+/* SUBTITLE */
+
+.subtitle{
+color:#555;
+margin-bottom:20px;
+text-align:center;
+}
+
+
+/* LABELS */
+
+
+label{
+font-weight:500;
+display:block;
+margin-bottom:5px;
+}
+
+
+/* INPUT FIELDS */
+
+
+input{
+width:100%;
+padding:12px;
+border-radius:8px;
+border:1px solid #ccc;
+margin-bottom:15px;
+font-size:14px;
+transition:0.2s;
+}
+
+input:hover{
+border-color:#0057b8;
+}
+
+input:focus{
+outline:none;
+border-color:#0057b8;
+box-shadow:0 0 6px rgba(0,87,184,0.25);
+}
+
+
+/* TWO COLUMN SIGNUP FORM */
+
+
+.row{
+display:flex;
+gap:15px;
+}
+
+.field{
+flex:1;
+}
+
+
+/* CHECKBOX ALIGNMENT */
+
+
+.checkbox-container{
+display:flex;
+align-items:center;
+gap:8px;
+margin:15px 0;
+}
+
+.checkbox-container input{
+width:auto;
+margin:0;
+}
+
+.checkbox-container label{
+margin:0;
+font-weight:500;
+}
+
+
+/* BUTTON */
+
+
+button{
+width:100%;
+padding:12px;
+border:none;
+border-radius:8px;
+background:#0057b8;
+color:white;
+font-weight:600;
+cursor:pointer;
+transition:0.2s;
+}
+
+button:hover{
+background:#003d80;
+}
+
+button:active{
+transform:scale(0.97);
+}
+
+
+/* LINKS */
+
+
+.form-link{
+text-align:center;
+margin-top:15px;
+}
+
+.form-link a{
+color:#0057b8;
+text-decoration:none;
+font-weight:500;
+}
+
+.form-link a:hover{
+text-decoration:underline;
+}
+
+
+/* ACCESSIBILITY FOCUS */
+
+
+a:focus,
+button:focus{
+outline:3px solid #0057b8;
+outline-offset:2px;
+}
+
+
+
+/* TEAMS */
+
+.teams-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+}
+
+.team-controls{
+display:flex;
+gap:20px;
+margin-bottom:25px;
+flex-wrap:wrap;
+}
+
+.team-controls select,
+.team-controls input{
+width:auto;
+min-width:220px;
+padding:12px;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:14px;
+transition:0.2s;
+}
+
+.team-controls input:hover,
+.team-controls select:hover{
+border-color:#0057b8;
+}
+
+.team-controls input:focus,
+.team-controls select:focus{
+outline:none;
+border-color:#0057b8;
+box-shadow:0 0 6px rgba(0,87,184,0.25);
+}
+
+.new-team-btn{
+width:auto;
+padding:12px 18px;
+}
+
+.team-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+gap:20px;
+margin-top:20px;
+}
+
+.team-box{
+height:120px;
+display:flex;
+justify-content:center;
+align-items:center;
+border-radius:12px;
+text-align:center;
+transition:0.25s;
+cursor:pointer;
+}
+
+.team-box:hover{
+transform:translateY(-4px);
+box-shadow:0 10px 25px rgba(0,0,0,0.12);
+}
+
+.team-box.blue{
+background:#b7c3ea;
+}
+
+.team-box.orange{
+background:#edc392;
+}
+
+.pagination{
+display:flex;
+margin-top:30px;
+}
+
+.pagination button{
+width:auto;
+padding:10px 16px;
+border-radius:0;
+}
