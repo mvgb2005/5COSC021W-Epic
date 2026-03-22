@@ -399,3 +399,145 @@ width:auto;
 padding:10px 16px;
 border-radius:0;
 }
+
+/**Teams overview Team A page**/
+/* TEAM TABS */
+
+.tabs-container input[type="radio"]{
+display:none;
+}
+
+.team-tabs{
+display:flex;
+margin:20px 0;
+border-radius:8px;
+overflow:hidden;
+}
+
+.team-tabs label{
+padding:12px 24px;
+background:#f2d6e5;
+cursor:pointer;
+border:1px solid #d3b4c7;
+border-right:none;
+transition:0.25s;
+}
+
+.team-tabs label:last-child{
+border-right:1px solid #d3b4c7;
+}
+
+.team-tabs label:hover{
+background:#e8bdd6;
+}
+
+.tab-content{
+display:none;
+}
+
+#tab-overview:checked ~ .team-tabs label[for="tab-overview"],
+#tab-repositories:checked ~ .team-tabs label[for="tab-repositories"],
+#tab-dependencies:checked ~ .team-tabs label[for="tab-dependencies"]{
+background:#e5a9c4;
+font-weight:600;
+}
+
+#tab-overview:checked ~ .overview-content{
+display:block;
+}
+
+#tab-repositories:checked ~ .repositories-content{
+display:block;
+}
+
+#tab-dependencies:checked ~ .dependencies-content{
+display:block;
+}
+
+/* TEAM PAGE LAYOUT */
+
+.team-layout{
+display:grid;
+grid-template-columns:2fr 1fr;
+gap:40px;
+margin-top:20px;
+}
+
+.contact-card{
+background:#aeb9e6;
+padding:20px;
+border-radius:16px;
+transition:0.25s;
+}
+
+.contact-card:hover{
+transform:translateY(-4px);
+box-shadow:0 10px 25px rgba(0,0,0,0.12);
+}
+
+.summary-card{
+background:#dda15e;
+padding:15px;
+border-radius:8px;
+}
+
+.summary-header{
+display:grid;
+grid-template-columns:2fr 1fr 1fr;
+font-weight:600;
+margin-bottom:10px;
+}
+
+.summary-row{
+display:grid;
+grid-template-columns:2fr 1fr 1fr;
+margin-bottom:15px;
+gap:10px;
+}
+
+.summary-bottom{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+}
+
+.summary-box{
+background:#f7f7f7;
+padding:15px;
+border:1px solid #999;
+text-align:center;
+}
+
+.image-card{
+background:#dfb58d;
+padding:30px;
+border:1px solid #777;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:220px;
+}
+
+.image-card img{
+max-width:100%;
+height:auto;
+}
+
+@media (max-width:900px){
+.team-layout{
+grid-template-columns:1fr;
+}
+
+.summary-header,
+.summary-row{
+grid-template-columns:1fr;
+}
+
+.summary-bottom{
+grid-template-columns:1fr;
+}
+
+.team-tabs{
+flex-wrap:wrap;
+}
+}
