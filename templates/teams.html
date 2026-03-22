@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+<!--{% extends 'base.html' %}
 
 {% block title %}Teams - Sky Portal{% endblock %}
 
@@ -14,4 +14,131 @@
     <li><a href="/teams/5/">Team 5</a></li>
     <li><a href="/teams/6/">Team 6</a></li>
 </ul>
-{% endblock %}
+{% endblock %}-->
+<!DOCTYPE html>
+<html lang="en">
+  <!--Code by Aurouba, not reactive page -->
+  <head>
+    <meta charset="UTF-8">
+    <title>Teams</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+
+  <body>
+
+    <header class="navbar">
+
+      <div class="logo-area">
+        <img src="logo.png" alt="Sky Engineering Portal Logo">
+        <span class="site-title">Sky Engineering Portal</span>
+      </div>
+
+      <nav class="nav-links" aria-label="Main Navigation">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="Teams.html">Teams</a>
+        <a href="Organisation Network View.html">Organisation</a>
+        <a href="Email Inbox.html">Messages</a>
+        <a href="Schedule .html">Schedule</a>
+        <a href="Reports.html">Reports</a>
+        <a href="Profile Settings.html">Profile</a>
+      </nav>
+
+      <form action="login.html">
+        <button class="logout-btn">Logout</button>
+      </form>
+
+    </header>
+    <main class="dashboard">
+      <div class="teams-header">
+        <div>
+          <h1>Teams</h1>
+          <p>Browse and manage engineering teams</p>
+        </div>
+        <button class="new-team-btn">+ New Team</button>
+      </div>
+      <div class="team-controls">
+        <select id="teamFilter">
+          <option value="all">View: All Teams</option>
+          <option value="engineering">Engineering</option>
+          <option value="devops">DevOps</option>
+          <option value="testing">Testing</option>
+        </select>
+
+        <select id="departmentFilter">
+          <option value="all">Filter Departments</option>
+          <option value="platform">Platform</option>
+          <option value="cloud">Cloud</option>
+        </select>
+
+        <select id="sortTeams">
+          <option value="active">Sort By Most Active</option>
+          <option value="az">Sort A-Z</option>
+          <option value="za">Sort Z-A</option>
+        </select>
+
+        <input type="text" id="searchTeams" placeholder="Search Teams">
+      </div>
+
+      <div class="team-grid" id="teamGrid">
+        <div class="team-grid">
+
+          <div class="team-box blue">
+            <h2>Team A</h2>
+          </div>
+
+          <div class="team-box orange">
+            <h2>Team B</h2>
+          </div>
+
+          <div class="team-box blue">
+            <h2>Team C</h2>
+          </div>
+
+          <div class="team-box orange">
+            <h2>Team D</h2>
+          </div>
+
+          <div class="team-box blue">
+            <h2>Team E</h2>
+          </div>
+
+          <div class="team-box orange">
+            <h2>Team F</h2>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section">
+
+      <div class="pagination">
+        <button>Previous</button>
+        <button class="active-page">1</button>
+        <button>2</button>
+        <button>...</button>
+        <button>»</button>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
+
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teams</title>
+  <div class="header" display: flex;>
+    <img src="SKY LOGO.png" alt="Sky logo" width="120" height="70">
+    <h1>Sky Engineering Portal</h1>
+    
+  </div>
+</head>
+<body>
+    <h2> Teams Page </h2>
+</body>
+</html>-->
