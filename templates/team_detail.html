@@ -3,21 +3,100 @@
 {% block title %}Team Details - Sky Portal{% endblock %}
 
 {% block content %}
-<h1>Team Details</h1>
-<p>placeholder team ID: {{ team_id }}</p>
 
-<h2>Overview</h2>
-<p>placeholder overview: teamname, description, department, teamleader</p>
+<h1>{{ team.teamName }}</h1>
+
+<p><strong>Department:</strong> {{ team.department.deptName }}</p>
+
+<p><strong>Team Leader:</strong>
+    {% if team.teamLeader %}
+        {{ team.teamLeader.username }}
+    {% else %}
+        Not assigned
+    {% endif %}
+</p>
+
+<p><strong>Description:</strong> {{ team.teamDesc }}</p>
+
+<hr>
 
 <h2>Members</h2>
-<p>placeholder members</p>
+{% if members %}
+    <ul>
+        {% for member in members %}
+            <li>{{ member.user.username }} - {{ member.role }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No members found.</p>
+{% endif %}
+
+<hr>
 
 <h2>Repositories</h2>
-<p>placeholder repositories</p>
+{% if repositories %}
+    <ul>
+        {% for repo in repositories %}
+            <li>
+                <a href="{{ repo.repoURL }}" target="_blank">
+                    {{ repo.repoName }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No repositories found.</p>
+{% endif %}
+
+<hr>
 
 <h2>Dependencies</h2>
-<p>placeholder dependencies</p>
+
+<h3>Upstream</h3>
+{% if upstream_dependencies %}
+    <ul>
+        {% for d in upstream_dependencies %}
+            <li>
+                <a href="{% url 'team_detail' d.downstreamDep.id %}">
+                    {{ d.downstreamDep.teamName }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No dependencies.</p>
+{% endif %}
+
+<h3>Downstream</h3>
+{% if downstream_dependencies %}
+    <ul>
+        {% for d in downstream_dependencies %}
+            <li>
+                <a href="{% url 'team_detail' d.upstreamDep.id %}">
+                    {{ d.upstreamDep.teamName }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No dependents.</p>
+{% endif %}
+
+<hr>
 
 <h2>Contact Channels</h2>
-<p>placeholder contact channels</p>
-{% endblock %}]
+{% if contacts %}
+    <ul>
+        {% for c in contacts %}
+            <li>
+                <a href="{{ c.channelVal }}" target="_blank">
+                    {{ c.channelType }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No contact channels found.</p>
+{% endif %}
+
+{% endblock %}

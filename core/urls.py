@@ -6,6 +6,6 @@ urlpatterns = [
     path('signup/', signup, name='signup'),
     path('logout/', user_logout, name='logout'),
     path('teams/', teams, name='teams'),
-    path('teams/<int:team_id>/', team_detail, name='teamdetail'),
+    path('teams/<int:team_id>/', team_detail, name='team_detail'),
     path('organisation/', organisation, name='organisation'),
 ]

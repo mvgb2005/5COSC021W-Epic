@@ -1,9 +1,9 @@
-from urllib import response
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from .forms import SignUpForm
+from .models import *
 
 # Create your views here.
 def signup(request):
@@ -30,16 +30,31 @@ def user_logout(request):
 @login_required
 @never_cache
 def teams(request):
-    return render(request, 'teams.html')
+    all_teams = Team.objects.select_related('department', 'teamLeader').all()
+    return render(request, 'teams.html', {'teams': all_teams})
 
 @login_required
 @never_cache
 def team_detail(request, team_id):
-    return render(request, 'team_detail.html', {'team_id': team_id})
+    team = get_object_or_404(Team, id=team_id)
+
+    members = Membership.objects.filter(team=team)
+    repos = Repository.objects.filter(team=team)
+    contacts = ContactChannel.objects.filter(team=team)
+    updep = Dependency.objects.filter(upstreamDep=team)
+    downdep = Dependency.objects.filter(downstreamDep=team)
+    return render(request, 'team_detail.html', {
+        'team': team,
+        'members': members,
+        'repositories': repos,
+        'contacts': contacts,
+        'upstream_dependencies': updep,
+        'downstream_dependencies': downdep
+    })
+
 
 @login_required
 @never_cache
 def organisation(request):
-    return render(request, 'organisation.html')
-
-
+    departments = Department.objects.prefetch_related('team_set').all()
+    return render(request, 'organisation.html', {'departments': departments})

@@ -13,7 +13,7 @@ class Department(models.Model):
 class Team(models.Model):
     STATUS = [('active', 'Active'), ('disbanded', 'Disbanded')] # team status choices
 
-    teamName = models.CharField(max_length=100, unique=True) # team name
+    teamName = models.CharField(max_length=100, unique=True, blank=False) # team name
     teamLeader = models.ForeignKey(User, on_delete=models.SET_NULL, null=True) # team leader userID
     department = models.ForeignKey(Department, on_delete=models.CASCADE) # departmentID
     teamDesc = models.TextField(blank=True) # team description
