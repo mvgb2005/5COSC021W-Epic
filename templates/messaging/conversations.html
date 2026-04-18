@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1> Inbox</h1>
+
+{% for c in conversations %}
+    <div>
+        <a href="{% url 'chat' c.id %}">
+            {% for user in c.participants.all %}
+                {% if user != request.user %}
+                    {{ user.username }}
+                {% endif %}
+            {% endfor %}
+        </a>
+    </div>
+{% empty %}
+    No conversations yet.
+{% endfor %}
+
+<hr>
+
+<h2> Start a new conversation </h2>
+
+{% for user in users %}
+    <div>
+        <a href="{% url 'start_conversation' user.id %}">{{ user.username }}</a>
+    </div>
+{% endfor %}
+
+{% endblock %}

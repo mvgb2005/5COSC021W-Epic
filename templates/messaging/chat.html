@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1> Chat </h1>
+
+<div>
+    {% for message in messages %}
+        <p>
+            <strong>{{ message.sender.username }}</strong>: {{ message.content }} <em>({{ message.timestamp }})</em>
+        </p>
+    {% endfor %}
+</div>
+
+<hr>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="text" name="content" placeholder="Type your message here..." required>
+    <button type="submit">Send</button>
+</form>
+
+{% endblock %}

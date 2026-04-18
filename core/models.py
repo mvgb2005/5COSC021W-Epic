@@ -83,3 +83,26 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.action} - {self.entityType} ({self.entityId})"
+    
+
+class Message(models.Model):
+    conversation = models.ForeignKey('Conversation', related_name='messages', on_delete=models.CASCADE) # conversationID
+    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE) # sender userID
+    content = models.TextField() # message content
+    timestamp = models.DateTimeField(auto_now_add=True) # message timestamp
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.conversation.lastUpdated = self.timestamp
+        self.conversation.save()
+
+    def __str__(self):
+        return f"{self.sender}: {self.content[:30]}..."
+    
+class Conversation(models.Model):
+    participants = models.ManyToManyField(User, related_name='conversations') # conversation participants
+    lastUpdated = models.DateTimeField(auto_now=True) # last updated timestamp
+
+    def __str__(self):
+        return f"Conversation {self.id}"
+    

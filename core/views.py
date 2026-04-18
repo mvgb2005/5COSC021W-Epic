@@ -58,3 +58,40 @@ def team_detail(request, team_id):
 def organisation(request):
     departments = Department.objects.prefetch_related('team_set').all()
     return render(request, 'organisation.html', {'departments': departments})
+
+
+
+
+# Messaging 
+@login_required
+# inbox view
+def conversations(request):
+    conversations = Conversation.objects.filter(participants=request.user).order_by('-lastUpdated')
+    users = User.objects.exclude(id=request.user.id)
+    return render(request, 'messaging/conversations.html', {'conversations': conversations, 'users': users})
+
+# start convo
+@login_required
+def start_conversation(request, user_id):
+    other_user = get_object_or_404(User, id=user_id)
+    conversation = Conversation.objects.filter(participants=request.user).filter(participants=other_user).first()
+    # if not create one
+    if not conversation:
+        conversation = Conversation.objects.create()
+        conversation.participants.add(request.user, other_user)
+    return redirect('chat', conversation.id)
+
+# chat view
+@login_required
+def chat(request, conversation_id):
+    conversation = get_object_or_404(Conversation, id=conversation_id)
+    # security check
+    if request.user not in conversation.participants.all():
+        return redirect('conversations')
+    messages = conversation.messages.order_by('timestamp')
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        if content:
+            Message.objects.create(conversation=conversation, sender=request.user, content=content)
+        return redirect('chat', conversation_id)
+    return render(request, 'messaging/chat.html', {'conversation': conversation, 'messages': messages})

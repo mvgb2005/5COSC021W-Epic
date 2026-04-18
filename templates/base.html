@@ -8,6 +8,7 @@
         <a href="/">Home</a>
         <a href="/teams/">Teams</a>
         <a href="/organisation/">Organisation</a>    
+        <a href="/chat/">Inbox</a>
         {% if user.is_authenticated %}
             <span>Welcome, {{ user.username }}!</span>
             <form action="/logout/" method="post" style="display: inline;">
