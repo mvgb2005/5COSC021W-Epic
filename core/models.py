@@ -1,5 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
 
@@ -21,6 +25,16 @@ class Team(models.Model):
     creationDate = models.DateTimeField(auto_now_add=True) # team creation date
     defunctDate = models.DateTimeField(null=True, blank=True) # team defunct date (if disbanded)
 
+    def clean(self):
+        if self.teamStatus == 'disbanded' and not self.defunctDate:
+            raise ValidationError('Defunct date must be set when team is disbanded.')
+        if self.teamStatus == 'active' and self.defunctDate:
+            raise ValidationError('Defunct date should be empty when team is active.')
+        
+    def save(self, *args, **kwargs):
+        self.clean() # validate before saving
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.teamName
         
@@ -37,6 +51,10 @@ class Membership(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.team.teamName}"
 
+@receiver(post_save, sender=Team)
+def add_team_leader_to_membership(sender, instance, created, **kwargs):
+    if created and instance.teamLeader:
+        Membership.objects.create(user=instance.teamLeader, team=instance, role='Team Leader')
 
 class Repository(models.Model):
     repoName = models.CharField(max_length=100, unique=True) # repository name
