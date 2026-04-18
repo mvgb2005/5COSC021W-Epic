@@ -1,28 +1,200 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>{% block title %}Sky Portal{% endblock %}</title>
-</head>
-<body>
-    <nav>
-        <a href="/">Home</a>
-        <a href="/teams/">Teams</a>
-        <a href="/organisation/">Organisation</a>    
-        <a href="/chat/">Inbox</a>
-        {% if user.is_authenticated %}
-            <span>Welcome, {{ user.username }}!</span>
-            <form action="/logout/" method="post" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit">Logout</button>
-            </form>
-        {% else %}
-            <a href="/accounts/login/">Login</a>
-            <a href="/accounts/signup/">Sign Up</a>
-        {% endif %}
-    </nav>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
 
-    <hr>
+        .container {
+            display: flex;
+        }
+
+        /* sidebar */
+        .sidebar {
+            width: 220px;
+            height: 100vh;
+            background-color: #1e1e2f;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .sidebar a:hover {
+            background-color: #33334d;
+        }
+
+        /* main content */
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        /* topbar */
+        .topbar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* profile container */
+        .profile-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* profile picture */
+        .profile-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            object-fit: cover;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* dropdown container */
+        .profile-menu {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            padding: 6px 10px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        /* top row (username + pfp) */
+        .profile-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* hidden by default */
+        .profile-username,
+        .logout-btn {
+            display: none;
+        }
+
+        /* hover expansion */
+        .profile-container:hover .profile-menu {
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 10px;
+        }
+
+        /* show elements on hover */
+        .profile-container:hover .profile-username, .profile-container:hover .logout-btn {
+            display: inline-block;
+        }
+
+        /* username */
+        .profile-username {
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* logout button */
+        .logout-btn {
+            display: none;
+            width: 100%;
+            margin: 0 auto;
+            padding: 6px 10px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            transition: background-color 0.2s ease;
+        }
+
+
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- sidebar -->
+    <div class="sidebar">
+        <h2>
+            <a href="/" style="color: white; text-decoration: none;">
+            Sky
+            </a>
+        </h2>
+
+        <a href="/organisation/">Organisation</a>
+        <a href="/teams/">Teams</a>
+        <a href="/chat/">Inbox</a>
+
+        {% if user.is_staff %}
+            <hr>
+            <a href="/admin/">Admin Panel</a>
+        {% endif %}
+    </div>
+
+    <!-- main content -->
+    <div class="content">
+
+        <!-- topbar -->
+        <div class="topbar">
+
+        {% if user.is_authenticated %}
+            <div class="profile-container">
+                <div class="profile-menu">
+
+                    <div class="profile-row">
+                        <span class="profile-username">{{ user.username }}</span>
+                        <img src="{% static 'images/pfp.png' %}" class="profile-btn">
+                    </div>
+
+                    <form action="/accounts/logout/" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-btn">Logout</button>
+                    </form>
+
+                </div>
+            </div>
+
+            {% endif %}
+
+        </div>
+
         {% block content %}
         {% endblock %}
+
+    </div>
+
+</div>
+
 </body>
 </html>
