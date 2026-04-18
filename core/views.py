@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from .forms import SignUpForm
@@ -64,34 +65,51 @@ def organisation(request):
 
 # Messaging 
 @login_required
-# inbox view
 def conversations(request):
-    conversations = Conversation.objects.filter(participants=request.user).order_by('-lastUpdated')
-    users = User.objects.exclude(id=request.user.id)
+    delete_empty_conversations()
+    conversations = Conversation.objects.filter(participants=request.user, messages__isnull=False).exclude(hidden_for=request.user).distinct().order_by('-lastUpdated')
+    users = User.objects.exclude(id=request.user.id).order_by('username')
+    hidden_for = models.ManyToManyField(User, related_name='hidden_conversations', blank=True)
     return render(request, 'messaging/conversations.html', {'conversations': conversations, 'users': users})
 
-# start convo
 @login_required
 def start_conversation(request, user_id):
     other_user = get_object_or_404(User, id=user_id)
-    conversation = Conversation.objects.filter(participants=request.user).filter(participants=other_user).first()
-    # if not create one
-    if not conversation:
-        conversation = Conversation.objects.create()
-        conversation.participants.add(request.user, other_user)
-    return redirect('chat', conversation.id)
+    convos = Conversation.objects.filter(participants=request.user).filter(participants=other_user)
+    convo = convos.first()
+    # solves duplication glitch
+    if convos.count() > 1:
+        convos.exclude(id=convo.id).delete()
+    if convo:
+        convo.hidden_for.remove(request.user)
+    else:
+        convo = Conversation.objects.create()
+        convo.participants.add(request.user, other_user)
+    return redirect('chat', conversation_id=convo.id)
 
-# chat view
 @login_required
 def chat(request, conversation_id):
-    conversation = get_object_or_404(Conversation, id=conversation_id)
-    # security check
-    if request.user not in conversation.participants.all():
+    convo = Conversation.objects.filter(id=conversation_id).first()
+    if not convo:
         return redirect('conversations')
-    messages = conversation.messages.order_by('timestamp')
+    if request.user not in convo.participants.all():
+        return redirect('conversations')
+    messages = Message.objects.filter(conversation=convo).order_by('timestamp')
+    users = User.objects.exclude(id=request.user.id).order_by('username')
+    conversations = Conversation.objects.filter(participants=request.user).exclude(hidden_for=request.user).distinct().order_by('-lastUpdated')
     if request.method == 'POST':
         content = request.POST.get('content')
         if content:
-            Message.objects.create(conversation=conversation, sender=request.user, content=content)
-        return redirect('chat', conversation_id)
-    return render(request, 'messaging/chat.html', {'conversation': conversation, 'messages': messages})
+            Message.objects.create(conversation=convo, sender=request.user, content=content)
+        return redirect('chat', conversation_id=convo.id)
+    return render(request, 'messaging/chat.html', {'conversation': convo,'messages': messages,'users': users,'conversations': conversations})
+
+def delete_empty_conversations():
+    empty_convos = Conversation.objects.filter(messages__isnull=True)
+    empty_convos.delete()
+
+@login_required
+def hide_conversation(request, conversation_id):
+    convo = get_object_or_404(Conversation, id=conversation_id)
+    convo.hidden_for.add(request.user)
+    return redirect('inbox')

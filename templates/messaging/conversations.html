@@ -2,30 +2,104 @@
 
 {% block content %}
 
-<h1> Inbox</h1>
+<div class="chat-wrapper">
 
-{% for c in conversations %}
-    <div>
-        <a href="{% url 'chat' c.id %}">
-            {% for user in c.participants.all %}
-                {% if user != request.user %}
-                    {{ user.username }}
-                {% endif %}
-            {% endfor %}
-        </a>
+    <!-- left side -->
+    <div class="chat-sidebar">
+
+        <h3>Chats</h3>
+
+        <!-- search -->
+        <div class="user-search">
+            <input type="text" id="userSearch" placeholder="Search users...">
+            <div id="userDropdown" class="user-dropdown">
+                {% for user in users %}
+                    <a href="{% url 'start_conversation' user.id %}" class="user-option">
+                        {{ user.username }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- recent chats -->
+        {% for convo in conversations %}
+            <div class="chat-item-wrapper">
+
+                <a href="{% url 'chat' convo.id %}" class="chat-item">
+                    {% for user in convo.participants.all %}
+                        {% if user != request.user %}
+                            {{ user.username }}
+                        {% endif %}
+                    {% endfor %}
+                </a>
+
+                <a href="{% url 'hide_conversation' convo.id %}" class="chat-close">×</a>
+
+            </div>
+        {% endfor %}
+
     </div>
-{% empty %}
-    No conversations yet.
-{% endfor %}
 
-<hr>
-
-<h2> Start a new conversation </h2>
-
-{% for user in users %}
-    <div>
-        <a href="{% url 'start_conversation' user.id %}">{{ user.username }}</a>
+    <!-- right side -->
+    <div class="chat-main">
+        <p style="padding:20px;">Select a chat to start messaging</p>
     </div>
-{% endfor %}
+
+</div>
+
+<!-- javascript -->
+<script>
+const search = document.getElementById("userSearch");
+const dropdown = document.getElementById("userDropdown");
+
+if (search && dropdown) {
+
+    const options = dropdown.getElementsByClassName("user-option");
+
+    // show dropdown on click
+    search.addEventListener("focus", () => {
+        dropdown.style.display = "block";
+    });
+
+    // filter users
+    search.addEventListener("input", () => {
+        const filter = search.value.toLowerCase();
+        let visibleCount = 0;
+
+        for (let i = 0; i < options.length; i++) {
+            const text = options[i].innerText.toLowerCase();
+
+            if (text.includes(filter)) {
+                options[i].style.display = "block";
+                visibleCount++;
+            } else {
+                options[i].style.display = "none";
+            }
+        }
+
+        // show "no results"
+        let noResults = document.getElementById("noResults");
+
+        if (visibleCount === 0) {
+            if (!noResults) {
+                noResults = document.createElement("div");
+                noResults.id = "noResults";
+                noResults.className = "no-results";
+                noResults.innerText = "No users found";
+                dropdown.appendChild(noResults);
+            }
+        } else {
+            if (noResults) noResults.remove();
+        }
+    });
+
+    // click outside = close
+    document.addEventListener("click", (e) => {
+        if (!search.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = "none";
+        }
+    });
+}
+</script>
 
 {% endblock %}

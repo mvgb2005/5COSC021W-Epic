@@ -120,7 +120,7 @@ class Message(models.Model):
 class Conversation(models.Model):
     participants = models.ManyToManyField(User, related_name='conversations') # conversation participants
     lastUpdated = models.DateTimeField(auto_now=True) # last updated timestamp
-
+    hidden_for = models.ManyToManyField(User,related_name='hidden_conversations', blank=True)
     def __str__(self):
         return f"Conversation {self.id}"
     

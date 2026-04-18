@@ -2,22 +2,138 @@
 
 {% block content %}
 
-<h1> Chat </h1>
+<div class="chat-wrapper">
 
-<div>
-    {% for message in messages %}
-        <p>
-            <strong>{{ message.sender.username }}</strong>: {{ message.content }} <em>({{ message.timestamp }})</em>
-        </p>
-    {% endfor %}
+    <!-- left side -->
+    <div class="chat-sidebar">
+
+        <h3>Chats</h3>
+
+        <!-- search -->
+        <div class="user-search">
+            <input type="text" id="userSearch" placeholder="Search users...">
+            <div id="userDropdown" class="user-dropdown">
+                {% for user in users %}
+                    <a href="{% url 'start_conversation' user.id %}" class="user-option">
+                        {{ user.username }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- recent chats -->
+        {% for convo in conversations %}
+            <div class="chat-item-wrapper">
+
+                <a href="{% url 'chat' convo.id %}" class="chat-item">
+                    {% for user in convo.participants.all %}
+                        {% if user != request.user %}
+                            {{ user.username }}
+                        {% endif %}
+                    {% endfor %}
+                </a>
+
+                <a href="{% url 'hide_conversation' convo.id %}" class="chat-close">×</a>
+
+            </div>
+        {% endfor %}
+
+    </div>
+
+    <!-- right side -->
+    <div class="chat-main">
+
+        <!-- messages -->
+        <div class="messages">
+
+            {% for msg in messages %}
+                <div class="message-row {% if msg.sender == request.user %}sent-row{% else %}received-row{% endif %}">
+
+                    {% if msg.sender == request.user %}
+                        <div class="message-time sender-time">
+                            {{ msg.timestamp|date:"d/m/Y H:i:s" }}
+                        </div>
+                    {% endif %}
+
+                    <div class="message-bubble {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
+                        {{ msg.content }}
+                    </div>
+
+                    {% if msg.sender != request.user %}
+                        <div class="message-time receiver-time">
+                            {{ msg.timestamp|date:"d/m/Y H:i:s" }}
+                        </div>
+                    {% endif %}
+
+                </div>
+            {% endfor %}
+
+        </div>
+
+        <!-- input -->
+        <form method="post" class="chat-input">
+            {% csrf_token %}
+            <input type="text" name="content" placeholder="Type a message..." required>
+            <button type="submit">Send</button>
+        </form>
+
+    </div>
+
 </div>
 
-<hr>
+<!-- javascript -->
+<script>
+const search = document.getElementById("userSearch");
+const dropdown = document.getElementById("userDropdown");
 
-<form method="post">
-    {% csrf_token %}
-    <input type="text" name="content" placeholder="Type your message here..." required>
-    <button type="submit">Send</button>
-</form>
+if (search && dropdown) {
+
+    const options = dropdown.getElementsByClassName("user-option");
+
+    // show dropdown on click
+    search.addEventListener("focus", () => {
+        dropdown.style.display = "block";
+    });
+
+    // filter users
+    search.addEventListener("input", () => {
+        const filter = search.value.toLowerCase();
+        let visibleCount = 0;
+
+        for (let i = 0; i < options.length; i++) {
+            const text = options[i].innerText.toLowerCase();
+
+            if (text.includes(filter)) {
+                options[i].style.display = "block";
+                visibleCount++;
+            } else {
+                options[i].style.display = "none";
+            }
+        }
+
+        // show "no results"
+        let noResults = document.getElementById("noResults");
+
+        if (visibleCount === 0) {
+            if (!noResults) {
+                noResults = document.createElement("div");
+                noResults.id = "noResults";
+                noResults.className = "no-results";
+                noResults.innerText = "No users found";
+                dropdown.appendChild(noResults);
+            }
+        } else {
+            if (noResults) noResults.remove();
+        }
+    });
+
+    // click outside = close
+    document.addEventListener("click", (e) => {
+        if (!search.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = "none";
+        }
+    });
+}
+</script>
 
 {% endblock %}
