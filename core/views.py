@@ -1,3 +1,5 @@
+from urllib import request
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
@@ -31,8 +33,10 @@ def user_logout(request):
 @login_required
 @never_cache
 def teams(request):
-    all_teams = Team.objects.select_related('department', 'teamLeader').all()
-    return render(request, 'teams.html', {'teams': all_teams})
+    all_teams = Team.objects.select_related('department', 'teamLeader').all().prefetch_related('membership_set').order_by('teamName')
+    active_teams = all_teams.filter(teamStatus='active')
+    disbanded_teams = all_teams.filter(teamStatus='disbanded')
+    return render(request, 'teams.html', {'teams': all_teams, 'active_teams': active_teams, 'disbanded_teams': disbanded_teams})
 
 @login_required
 @never_cache
@@ -57,7 +61,7 @@ def team_detail(request, team_id):
 @login_required
 @never_cache
 def organisation(request):
-    departments = Department.objects.prefetch_related('team_set').all()
+    departments = Department.objects.prefetch_related('team_set').filter(team__teamStatus='active').distinct().order_by('deptName')
     return render(request, 'organisation.html', {'departments': departments})
 
 

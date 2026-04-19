@@ -1,28 +1,45 @@
 {% extends 'base.html' %}
-
-{% block title %}Teams - Sky Portal{% endblock %}
-
 {% block content %}
-    <h1>Teams</h1>
 
-{% if teams %}
-    <ul>
-        {% for team in teams %}
-            <li>
-                <a href="{% url 'team_detail' team.id %}">{{ team.teamName }}</a><br>
-                Department: {{ team.department.deptName }}<br>
-                Leader:
-                    {% if team.teamLeader %}
-                        {{ team.teamLeader.username }}
-                    {% else %}
-                        Not assigned
-                    {% endif %} <br>
-                Members: {{ team.membership_set.count }}
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No teams found.</p>
-{% endif %}
+<h2>Active Teams</h2>
+
+{% for team in active_teams %}
+    <div style="padding:10px; margin:8px 0; background:#f5f5f5; border-radius:6px;">
+        
+        <strong>
+            <a href="{% url 'team_detail' team.id %}" style="text-decoration:none; color:inherit;">
+                {{ team.teamName }}
+            </a>
+        </strong>
+        <br>
+        Department: {{ team.department.deptName }}<br>
+        Leader: {{ team.teamLeader.username }}<br>
+        Members: {{ team.membership_set.count }}
+
+    </div>
+{% empty %}
+    <p>No active teams</p>
+{% endfor %}
+
+
+<h2 style="margin-top:30px;">Disbanded Teams</h2>
+
+{% for team in disbanded_teams %}
+    <div style="padding:10px; margin:8px 0; background:#f5f5f5; border-radius:6px;">
+        
+        <strong>
+            <a href="{% url 'team_detail' team.id %}" style="text-decoration:none; color:inherit;">
+                {{ team.teamName }}
+            </a>
+        </strong>
+        <br>
+        Department: {{ team.department.deptName }}<br>
+        Leader: {{ team.teamLeader.username }}<br>
+        Members: {{ team.membership_set.count }}
+
+    </div>
+{% empty %}
+    <p>No disbanded teams</p>
+{% endfor %}
 
 {% endblock %}

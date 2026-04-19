@@ -1,33 +1,29 @@
-{% extends "base.html" %}
-
-{% block title %}Organisation{% endblock %}
-
+{% extends 'base.html' %}
 {% block content %}
 
-<h1>Organisation</h1>
+<h2>Departments</h2>
 
-{% if departments %}
-    {% for dept in departments %}
-        <h2>{{ dept.deptName }}</h2>
-
-        {% if dept.team_set.all %}
-            <ul>
-                {% for team in dept.team_set.all %}
-                    <li>
-                        <a href="{% url 'team_detail' team.id %}">
-                            {{ team.teamName }}
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No teams in this department.</p>
-        {% endif %}
-
-        <hr>
-    {% endfor %}
-{% else %}
-    <p>No departments found.</p>
-{% endif %}
+{% for dept in departments %}
+    <div style="margin-bottom: 30px;">        
+        <h3>
+            {{ dept.deptName }} -
+            {% if dept.deptHead %}
+                {{ dept.deptHead.username }}
+            {% else %}
+                No head assigned
+            {% endif %}
+        </h3>
+        <div style="margin-left: 20px;">            
+            {% for team in dept.team_set.all|dictsort:"teamName" %}
+                {% if team.teamStatus == "active" %}              
+                    <a href="{% url 'team_detail' team.id %}"
+                       style="display:block; padding:8px; margin:5px 0; background:#f0f0f0; border-radius:6px; text-decoration:none; color:black;">
+                        {{ team.teamName }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}
 
 {% endblock %}
