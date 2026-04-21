@@ -7,6 +7,53 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from .forms import SignUpForm
 from .models import *
+from django.http import HttpResponse
+from openpyxl import Workbook
+from openpyxl.chart import BarChart, Reference
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.charts.barcharts import VerticalBarChart
+
+
+# Creating the helper function for report data
+def get_report_data():
+    users_count = User.objects.count()
+    teams_count = Team.objects.count()
+    departments_count = Department.objects.count()
+    messages_count = Message.objects.count()
+    conversations_count = Conversation.objects.count()
+
+    recent_messages = Message.objects.select_related('sender', 'conversation').order_by('-timestamp')[:10]
+
+    return {
+        'users_count': users_count,
+        'teams_count': teams_count,
+        'departments_count': departments_count,
+        'messages_count': messages_count,
+        'conversations_count': conversations_count,
+        'recent_messages': recent_messages,
+    }
+
+# Making the chats grouped
+def get_grouped_chat_data():
+    conversations = Conversation.objects.prefetch_related('participants').order_by('id')
+    grouped_data = []
+
+    for convo in conversations:
+        participants = list(convo.participants.all())
+        participant_names = ", ".join([user.username for user in participants])
+
+        messages = Message.objects.filter(conversation=convo).select_related('sender').order_by('timestamp')
+
+        grouped_data.append({
+            'conversation': convo,
+            'participant_names': participant_names,
+            'messages': messages,
+        })
+
+    return grouped_data
+
 
 # Create your views here.
 def signup(request):
@@ -117,3 +164,244 @@ def hide_conversation(request, conversation_id):
     convo = get_object_or_404(Conversation, id=conversation_id)
     convo.hidden_for.add(request.user)
     return redirect('inbox')
+
+
+#excel report view
+@login_required
+def export_excel_report(request):
+    report_data = get_report_data()
+
+    workbook = Workbook()
+
+
+    summary_sheet = workbook.active
+    summary_sheet.title = "Summary"
+
+    summary_sheet.append(["Category", "Count"])
+    summary_sheet.append(["Users", report_data['users_count']])
+    summary_sheet.append(["Teams", report_data['teams_count']])
+    summary_sheet.append(["Departments / Organisations", report_data['departments_count']])
+    summary_sheet.append(["Messages", report_data['messages_count']])
+    summary_sheet.append(["Conversations", report_data['conversations_count']])
+
+
+    chart = BarChart()
+    chart.title = "System Overview"
+    chart.y_axis.title = "Count"
+    chart.x_axis.title = "Category"
+
+    data = Reference(summary_sheet, min_col=2, min_row=1, max_row=6)
+    categories = Reference(summary_sheet, min_col=1, min_row=2, max_row=6)
+
+    chart.add_data(data, titles_from_data=True)
+    chart.set_categories(categories)
+    summary_sheet.add_chart(chart, "D2")
+
+
+    messages_sheet = workbook.create_sheet(title="Recent Chat History")
+    messages_sheet.append(["Sender", "Conversation ID", "Message", "Timestamp"])
+
+    for msg in report_data['recent_messages']:
+        messages_sheet.append([
+            msg.sender.username if msg.sender else "Unknown",
+            msg.conversation.id if msg.conversation else "",
+            msg.content,
+            str(msg.timestamp),
+        ])
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="system_report.xlsx"'
+
+    workbook.save(response)
+    return response
+
+#pdf report view
+@login_required
+def export_pdf_report(request):
+    report_data = get_report_data()
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="system_report.pdf"'
+
+    p = canvas.Canvas(response, pagesize=letter)
+    width, height = letter
+
+    p.setFont("Helvetica-Bold", 18)
+    p.drawString(50, height - 50, "System Report")
+
+    p.setFont("Helvetica", 12)
+    y = height - 90
+
+    p.drawString(50, y, f"Users: {report_data['users_count']}")
+    y -= 20
+    p.drawString(50, y, f"Teams: {report_data['teams_count']}")
+    y -= 20
+    p.drawString(50, y, f"Departments / Organisations: {report_data['departments_count']}")
+    y -= 20
+    p.drawString(50, y, f"Messages: {report_data['messages_count']}")
+    y -= 20
+    p.drawString(50, y, f"Conversations: {report_data['conversations_count']}")
+    y -= 40
+
+
+    drawing = Drawing(400, 200)
+    chart = VerticalBarChart()
+    chart.x = 50
+    chart.y = 50
+    chart.height = 125
+    chart.width = 300
+    chart.data = [[
+        report_data['users_count'],
+        report_data['teams_count'],
+        report_data['departments_count'],
+        report_data['messages_count'],
+        report_data['conversations_count'],
+    ]]
+    chart.categoryAxis.categoryNames = ['Users', 'Teams', 'Departments', 'Messages', 'Chats']
+    chart.valueAxis.valueMin = 0
+    chart.valueAxis.valueMax = max(
+        5,
+        report_data['users_count'],
+        report_data['teams_count'],
+        report_data['departments_count'],
+        report_data['messages_count'],
+        report_data['conversations_count'],
+    ) + 2
+    chart.valueAxis.valueStep = 1
+
+    drawing.add(chart)
+    drawing.drawOn(p, 50, y - 170)
+
+    y -= 210
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(50, y, "Recent Chat History")
+    y -= 25
+
+    p.setFont("Helvetica", 10)
+
+    for msg in report_data['recent_messages']:
+        line = f"{msg.sender.username}: {msg.content[:60]} ({msg.timestamp})"
+        p.drawString(50, y, line[:100])
+        y -= 15
+
+        if y < 50:
+            p.showPage()
+            p.setFont("Helvetica", 10)
+            y = height - 50
+
+    p.showPage()
+    p.save()
+    return response
+#report page view
+@login_required
+def reports_page(request):
+    report_data = get_report_data()
+
+    chart_labels = ['Users', 'Teams', 'Departments', 'Messages', 'Conversations']
+    chart_values = [
+        report_data['users_count'],
+        report_data['teams_count'],
+        report_data['departments_count'],
+        report_data['messages_count'],
+        report_data['conversations_count'],
+    ]
+
+    return render(request, 'reports.html', {
+        'report_data': report_data,
+        'chart_labels': chart_labels,
+        'chart_values': chart_values,
+    })
+#full chat in excel
+@login_required
+def export_full_chat_excel(request):
+    grouped_chats = get_grouped_chat_data()
+
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Full Chat Export"
+
+    row_num = 1
+
+    for chat in grouped_chats:
+        sheet.cell(row=row_num, column=1, value=f"Chat: {chat['participant_names']}")
+        row_num += 1
+
+        sheet.cell(row=row_num, column=1, value="Sender")
+        sheet.cell(row=row_num, column=2, value="Message")
+        sheet.cell(row=row_num, column=3, value="Timestamp")
+        row_num += 1
+
+        for msg in chat['messages']:
+            sheet.cell(row=row_num, column=1, value=msg.sender.username if msg.sender else "Unknown")
+            sheet.cell(row=row_num, column=2, value=msg.content)
+            sheet.cell(row=row_num, column=3, value=str(msg.timestamp))
+            row_num += 1
+
+        row_num += 2
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="grouped_chat_export.xlsx"'
+
+    workbook.save(response)
+    return response
+#full chat in pdf
+@login_required
+def export_full_chat_pdf(request):
+    grouped_chats = get_grouped_chat_data()
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="grouped_chat_export.pdf"'
+
+    p = canvas.Canvas(response, pagesize=letter)
+    width, height = letter
+    y = height - 40
+
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(50, y, "Full Chat Export")
+    y -= 30
+
+    for chat in grouped_chats:
+        if y < 100:
+            p.showPage()
+            y = height - 40
+
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(50, y, f"Chat: {chat['participant_names']}")
+        y -= 20
+
+        p.setFont("Helvetica", 10)
+
+        for msg in chat['messages']:
+            sender = msg.sender.username if msg.sender else "Unknown"
+            timestamp = str(msg.timestamp)
+            content = msg.content if msg.content else ""
+
+            header_line = f"{sender} - {timestamp}"
+            p.drawString(60, y, header_line[:100])
+            y -= 12
+
+            chunk_size = 90
+            for i in range(0, len(content), chunk_size):
+                if y < 50:
+                    p.showPage()
+                    y = height - 40
+                    p.setFont("Helvetica", 10)
+
+                p.drawString(70, y, content[i:i + chunk_size])
+                y -= 12
+
+            y -= 10
+
+            if y < 50:
+                p.showPage()
+                y = height - 40
+                p.setFont("Helvetica", 10)
+
+        y -= 10
+
+    p.save()
+    return response

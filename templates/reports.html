@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .report-box {
+        max-width: 1000px;
+        margin: 20px auto;
+        padding: 25px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+    }
+
+    .report-box h1,
+    .report-box h2 {
+        margin-bottom: 20px;
+    }
+
+    .report-box table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 25px;
+    }
+
+    .report-box th,
+    .report-box td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .report-box th {
+        background-color: #eee;
+    }
+
+    .button-group a {
+        display: inline-block;
+        padding: 10px 18px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        text-decoration: none;
+        color: white;
+        border-radius: 5px;
+    }
+
+    .pdf-button {
+        background-color: #007bff;
+    }
+
+    .pdf-button:hover {
+        background-color: #0056b3;
+    }
+
+    .excel-button {
+        background-color: #28a745;
+    }
+
+    .excel-button:hover {
+        background-color: #1e7e34;
+    }
+
+    .chart-container {
+        width: 100%;
+        max-width: 700px;
+        margin: 0 auto 30px auto;
+    }
+</style>
+
+<div class="report-box">
+    <h1>System Report</h1>
+
+    <h2>Overview Chart</h2>
+    <div class="chart-container">
+        <canvas id="reportChart"></canvas>
+    </div>
+
+    <table>
+        <tr>
+            <th>Category</th>
+            <th>Count</th>
+        </tr>
+        <tr>
+            <td>Users</td>
+            <td>{{ report_data.users_count }}</td>
+        </tr>
+        <tr>
+            <td>Teams</td>
+            <td>{{ report_data.teams_count }}</td>
+        </tr>
+        <tr>
+            <td>Departments / Organisations</td>
+            <td>{{ report_data.departments_count }}</td>
+        </tr>
+        <tr>
+            <td>Messages</td>
+            <td>{{ report_data.messages_count }}</td>
+        </tr>
+        <tr>
+            <td>Conversations</td>
+            <td>{{ report_data.conversations_count }}</td>
+        </tr>
+    </table>
+
+    <h2>Recent Chat History</h2>
+
+    <table>
+        <tr>
+            <th>Sender</th>
+            <th>Conversation</th>
+            <th>Message</th>
+            <th>Timestamp</th>
+        </tr>
+        {% for msg in report_data.recent_messages %}
+        <tr>
+            <td>{{ msg.sender.username }}</td>
+            <td>{{ msg.conversation.id }}</td>
+            <td>{{ msg.content }}</td>
+            <td>{{ msg.timestamp }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No recent messages found.</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <div class="button-group">
+        <a href="{% url 'export_pdf_report' %}" class="pdf-button">Download Summary PDF</a>
+        <a href="{% url 'export_excel_report' %}" class="excel-button">Download Summary Excel</a>
+        <a href="{% url 'export_full_chat_pdf' %}" class="pdf-button">Download Grouped Chat PDF</a>
+        <a href="{% url 'export_full_chat_excel' %}" class="excel-button">Download Grouped Chat Excel</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const chartLabels = [
+        {% for label in chart_labels %}
+            "{{ label }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    const chartValues = [
+        {% for value in chart_values %}
+            {{ value }}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    const ctx = document.getElementById('reportChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: 'System Counts',
+                data: chartValues,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}
