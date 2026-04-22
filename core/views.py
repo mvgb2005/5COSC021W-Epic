@@ -1,5 +1,5 @@
 from urllib import request
-
+from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
@@ -34,6 +34,9 @@ def get_report_data():
         'conversations_count': conversations_count,
         'recent_messages': recent_messages,
     }
+
+def admin_required_message(request):
+    return render(request, 'admin_only.html')
 
 # Making the chats grouped
 def get_grouped_chat_data():
@@ -169,6 +172,9 @@ def hide_conversation(request, conversation_id):
 #excel report view
 @login_required
 def export_excel_report(request):
+    if not request.user.is_staff:
+        return render(request, 'admin_only.html')
+
     report_data = get_report_data()
 
     workbook = Workbook()
@@ -220,6 +226,9 @@ def export_excel_report(request):
 #pdf report view
 @login_required
 def export_pdf_report(request):
+    if not request.user.is_staff:
+        return render(request, 'admin_only.html')
+
     report_data = get_report_data()
 
     response = HttpResponse(content_type='application/pdf')
@@ -297,6 +306,9 @@ def export_pdf_report(request):
 #report page view
 @login_required
 def reports_page(request):
+    if not request.user.is_staff:
+        return render(request, 'admin_only.html')
+
     report_data = get_report_data()
 
     chart_labels = ['Users', 'Teams', 'Departments', 'Messages', 'Conversations']
@@ -313,9 +325,18 @@ def reports_page(request):
         'chart_labels': chart_labels,
         'chart_values': chart_values,
     })
+
+    return render(request, 'reports.html', {
+        'report_data': report_data,
+        'chart_labels': chart_labels,
+        'chart_values': chart_values,
+    })
 #full chat in excel
 @login_required
 def export_full_chat_excel(request):
+    if not request.user.is_staff:
+        return render(request, 'admin_only.html')
+
     grouped_chats = get_grouped_chat_data()
 
     workbook = Workbook()
@@ -351,6 +372,9 @@ def export_full_chat_excel(request):
 #full chat in pdf
 @login_required
 def export_full_chat_pdf(request):
+    if not request.user.is_staff:
+        return render(request, 'admin_only.html')
+
     grouped_chats = get_grouped_chat_data()
 
     response = HttpResponse(content_type='application/pdf')
