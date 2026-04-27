@@ -30,7 +30,7 @@ python manage.py createsuperuser
 ```
 Follow the prompts to set an admin username and password.
 
-### 6. Run the server
+### 6. Run server
 ```
 python manage.py runserver
 ```
