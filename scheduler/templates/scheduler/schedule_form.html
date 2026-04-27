@@ -1,0 +1,37 @@
+
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Meeting Form - Sky Portal{% endblock %}
+
+{% block content %}
+
+<!-- load scheduler css -->
+<link rel="stylesheet" href="{% static 'scheduler/schedule.css' %}">
+
+<div class="form-box">
+
+    <!-- show heading based on action -->
+    {% if meeting %}
+        <h1>Update Meeting</h1>
+    {% else %}
+        <h1>Add New Meeting</h1>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <!-- display django form -->
+        {{ form.as_p }}
+
+        <!-- save form -->
+        <button type="submit" class="save-btn">Save</button>
+
+        <!-- cancel and return -->
+        <a href="{% url 'schedule' %}" class="back-btn">Cancel</a>
+    </form>
+
+</div>
+
+{% endblock %}
+```
