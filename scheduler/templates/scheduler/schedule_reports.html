@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Schedule Reports - Sky Portal{% endblock %}
+
+{% block content %}
+
+<!-- load scheduler css -->
+<link rel="stylesheet" href="{% static 'scheduler/schedule.css' %}">
+
+<div class="report-box">
+
+    <h1>Schedule Reports</h1>
+
+    <!-- filter meetings -->
+    <form method="GET" action="{% url 'schedule_reports' %}" class="filter-form">
+        <input type="text" name="q" placeholder="Search title or message..." value="{{ q }}">
+
+        <input type="date" name="date" value="{{ date_filter }}">
+
+        <select name="platform">
+            <option value="">All Platforms</option>
+            <option value="zoom" {% if platform_filter == "zoom" %}selected{% endif %}>Zoom</option>
+            <option value="teams" {% if platform_filter == "teams" %}selected{% endif %}>Microsoft Teams</option>
+            <option value="google_meet" {% if platform_filter == "google_meet" %}selected{% endif %}>Google Meet</option>
+        </select>
+
+        <select name="filter">
+            <option value="">All Types</option>
+            <option value="upcoming" {% if schedule_filter == "upcoming" %}selected{% endif %}>Upcoming</option>
+            <option value="weekly" {% if schedule_filter == "weekly" %}selected{% endif %}>Weekly</option>
+            <option value="monthly" {% if schedule_filter == "monthly" %}selected{% endif %}>Monthly</option>
+        </select>
+
+        <!-- apply filter -->
+        <button type="submit">Filter</button>
+
+        <!-- clear filters -->
+        <a href="{% url 'schedule_reports' %}" class="clear-btn">Clear</a>
+    </form>
+
+    <!-- chart section -->
+    <h2>Schedule Statistics</h2>
+
+    <div class="chart-container">
+        <canvas id="scheduleChart"></canvas>
+    </div>
+
+    <!-- download report files -->
+    <div class="button-group">
+        <a href="{% url 'export_schedule_pdf' %}" class="pdf-button">Download Schedule PDF</a>
+        <a href="{% url 'export_schedule_excel' %}" class="excel-button">Download Schedule Excel</a>
+    </div>
+
+    <!-- meetings table -->
+    <h2>Filtered Meetings</h2>
+
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Platform</th>
+            <th>Type</th>
+            <th>Created By</th>
+            <th>Message</th>
+        </tr>
+
+        {% for meeting in meetings %}
+        <tr>
+            <td>{{ meeting.meetingTitle }}</td>
+            <td>{{ meeting.meetingDate }}</td>
+            <td>{{ meeting.meetingTime }}</td>
+            <td>{{ meeting.get_meetingPlatform_display }}</td>
+            <td>{{ meeting.get_scheduleType_display }}</td>
+            <td>{{ meeting.createdBy.username }}</td>
+            <td>{{ meeting.meetingMessage }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">No meetings found.</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // get chart canvas
+    const ctx = document.getElementById('scheduleChart').getContext('2d');
+
+    // create bar chart
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Upcoming', 'Weekly', 'Monthly', 'Zoom', 'Teams', 'Google Meet'],
+            datasets: [{
+                label: 'Schedule Count',
+                data: [
+                    {{ upcoming_count }},
+                    {{ weekly_count }},
+                    {{ monthly_count }},
+                    {{ zoom_count }},
+                    {{ teams_count }},
+                    {{ google_count }}
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}
