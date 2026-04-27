@@ -1,6 +1,9 @@
 # 5COSC021W-Epic
 Software Development Group Project
 
+## Group members
+Aurouba, Mohul, Samuel, Syed
+
 
 ## Setup and Run Instructions (PowerShell)
 
