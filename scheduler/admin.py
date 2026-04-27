@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import ScheduleMeeting
 
-# Register your models here.
+# register schedule model in admin panel
+admin.site.register(ScheduleMeeting)
