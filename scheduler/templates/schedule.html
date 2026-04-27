@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Schedule - Sky Portal{% endblock %}
+
+{% block content %}
+
+<!-- load scheduler css -->
+<link rel="stylesheet" href="{% static 'scheduler/schedule.css' %}">
+
+<div class="schedule-box">
+
+    <div class="schedule-top">
+        <h1>Schedule Meetings</h1>
+
+        <!-- open create meeting page -->
+        <a href="{% url 'create_schedule' %}" class="add-btn">Add New Meeting</a>
+    </div>
+
+    <!-- show success messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message-box">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- search and filter meetings -->
+    <form method="GET" action="{% url 'schedule' %}" class="search-form">
+        <input type="text" name="q" placeholder="Search title or message..." value="{{ q }}">
+
+        <select name="filter">
+            <option value="">All Meetings</option>
+            <option value="upcoming" {% if schedule_filter == "upcoming" %}selected{% endif %}>Upcoming</option>
+            <option value="weekly" {% if schedule_filter == "weekly" %}selected{% endif %}>Weekly</option>
+            <option value="monthly" {% if schedule_filter == "monthly" %}selected{% endif %}>Monthly</option>
+        </select>
+
+        <!-- apply search -->
+        <button type="submit">Search</button>
+
+        <!-- clear search -->
+        <a href="{% url 'schedule' %}" class="add-btn">Clear</a>
+    </form>
+
+    <!-- calendar section -->
+    <div class="calendar-box">
+        <div class="calendar-header">
+            <button onclick="changeMonth(-1)">Previous</button>
+            <h2 id="calendarTitle"></h2>
+            <button onclick="changeMonth(1)">Next</button>
+        </div>
+
+        <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <!-- upcoming meeting cards -->
+    <div class="meeting-section">
+        <h2>Upcoming Schedules</h2>
+
+        {% for meeting in upcoming_meetings %}
+            <div class="meeting-card">
+                <h3>{{ meeting.meetingTitle }}</h3>
+                <p><strong>Date:</strong> {{ meeting.meetingDate }}</p>
+                <p><strong>Time:</strong> {{ meeting.meetingTime }}</p>
+                <p><strong>Platform:</strong> {{ meeting.get_meetingPlatform_display }}</p>
+                <p><strong>Message:</strong> {{ meeting.meetingMessage }}</p>
+
+                <div class="meeting-actions">
+                    <!-- update meeting -->
+                    <a href="{% url 'update_schedule' meeting.id %}" class="edit-btn">Update</a>
+
+                    <!-- delete meeting -->
+                    <a href="{% url 'delete_schedule' meeting.id %}" class="delete-btn">Delete</a>
+                </div>
+            </div>
+        {% empty %}
+            <p>No upcoming meetings found.</p>
+        {% endfor %}
+    </div>
+
+    <!-- weekly meeting cards -->
+    <div class="meeting-section">
+        <h2>Weekly Meetings</h2>
+
+        {% for meeting in weekly_meetings %}
+            <div class="meeting-card">
+                <h3>{{ meeting.meetingTitle }}</h3>
+                <p><strong>Date:</strong> {{ meeting.meetingDate }}</p>
+                <p><strong>Time:</strong> {{ meeting.meetingTime }}</p>
+                <p><strong>Platform:</strong> {{ meeting.get_meetingPlatform_display }}</p>
+                <p><strong>Message:</strong> {{ meeting.meetingMessage }}</p>
+
+                <div class="meeting-actions">
+                    <!-- update meeting -->
+                    <a href="{% url 'update_schedule' meeting.id %}" class="edit-btn">Update</a>
+
+                    <!-- delete meeting -->
+                    <a href="{% url 'delete_schedule' meeting.id %}" class="delete-btn">Delete</a>
+                </div>
+            </div>
+        {% empty %}
+            <p>No weekly meetings found.</p>
+        {% endfor %}
+    </div>
+
+    <!-- monthly meeting cards -->
+    <div class="meeting-section">
+        <h2>Monthly Meetings</h2>
+
+        {% for meeting in monthly_meetings %}
+            <div class="meeting-card">
+                <h3>{{ meeting.meetingTitle }}</h3>
+                <p><strong>Date:</strong> {{ meeting.meetingDate }}</p>
+                <p><strong>Time:</strong> {{ meeting.meetingTime }}</p>
+                <p><strong>Platform:</strong> {{ meeting.get_meetingPlatform_display }}</p>
+                <p><strong>Message:</strong> {{ meeting.meetingMessage }}</p>
+
+                <div class="meeting-actions">
+                    <!-- update meeting -->
+                    <a href="{% url 'update_schedule' meeting.id %}" class="edit-btn">Update</a>
+
+                    <!-- delete meeting -->
+                    <a href="{% url 'delete_schedule' meeting.id %}" class="delete-btn">Delete</a>
+                </div>
+            </div>
+        {% empty %}
+            <p>No monthly meetings found.</p>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- meeting data for calendar -->
+<script>
+    const meetingData = [
+        {% for meeting in meetings %}
+            {
+                title: "{{ meeting.meetingTitle|escapejs }}",
+                date: "{{ meeting.meetingDate|date:'Y-m-d' }}"
+            }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    let currentDate = new Date();
+
+    // build calendar
+    function renderCalendar() {
+        const grid = document.getElementById("calendarGrid");
+        const title = document.getElementById("calendarTitle");
+
+        grid.innerHTML = "";
+
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+
+        title.innerText = firstDay.toLocaleString("default", {
+            month: "long",
+            year: "numeric"
+        });
+
+        const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+        // show weekday names
+        for (let i = 0; i < dayNames.length; i++) {
+            const dayBox = document.createElement("div");
+            dayBox.className = "calendar-day";
+            dayBox.innerHTML = "<strong>" + dayNames[i] + "</strong>";
+            grid.appendChild(dayBox);
+        }
+
+        // add blank spaces before month starts
+        for (let i = 0; i < firstDay.getDay(); i++) {
+            const emptyBox = document.createElement("div");
+            emptyBox.className = "calendar-day";
+            grid.appendChild(emptyBox);
+        }
+
+        // add month days
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+            const dateText = year + "-" +
+                String(month + 1).padStart(2, "0") + "-" +
+                String(day).padStart(2, "0");
+
+            const dayBox = document.createElement("div");
+            dayBox.className = "calendar-day";
+            dayBox.innerHTML = "<strong>" + day + "</strong>";
+
+            // add meeting to matching date
+            meetingData.forEach(meeting => {
+                if (meeting.date === dateText) {
+                    dayBox.innerHTML += "<span class='calendar-event'>" + meeting.title + "</span>";
+                }
+            });
+
+            grid.appendChild(dayBox);
+        }
+    }
+
+    // move calendar month
+    function changeMonth(change) {
+        currentDate.setMonth(currentDate.getMonth() + change);
+        renderCalendar();
+    }
+
+    renderCalendar();
+</script>
+
+{% endblock %}
