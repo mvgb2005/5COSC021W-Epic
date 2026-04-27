@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Delete Meeting - Sky Portal{% endblock %}
+
+{% block content %}
+
+<!-- load scheduler css -->
+<link rel="stylesheet" href="{% static 'scheduler/schedule.css' %}">
+
+<div class="delete-box">
+    <h1>Delete Meeting</h1>
+
+    <!-- confirm selected meeting -->
+    <p>Are you sure you want to delete <strong>{{ meeting.meetingTitle }}</strong>?</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <!-- delete meeting -->
+        <button type="submit" class="confirm-btn">Confirm Delete</button>
+
+        <!-- cancel delete -->
+        <a href="{% url 'schedule' %}" class="cancel-btn">Cancel</a>
+    </form>
+</div>
+
+{% endblock %}
