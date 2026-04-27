@@ -14,11 +14,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.auth import views as auth_views  # django auth views
+from core.views import LockedLoginView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
+    path('schedule/', include('scheduler.urls')),
+
+    # force logout to return login page
+    path('accounts/logout/', auth_views.LogoutView.as_view(next_page='/accounts/login/'), name='logout'),
+
+    # django login system
     path('accounts/', include('django.contrib.auth.urls')),
-]
+
+    # custom login with 5 attempt lockout
+    path('accounts/login/', LockedLoginView.as_view(), name='login'),
+    ]
