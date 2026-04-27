@@ -14,6 +14,9 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.barcharts import VerticalBarChart
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.forms import AuthenticationForm
+from django.core.cache import cache
 
 
 # Creating the helper function for report data
@@ -58,7 +61,7 @@ def get_grouped_chat_data():
     return grouped_data
 
 
-# Create your views here.
+# Create views here.
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -80,6 +83,56 @@ def user_logout(request):
         logout(request)
     return redirect('/accounts/login/')
 
+# login view with failed password lockout
+
+class LockedLoginView(LoginView):
+    template_name = 'registration/login.html'
+    authentication_form = AuthenticationForm
+
+    def dispatch(self, request, *args, **kwargs):
+        # block login before checking password
+        if request.method == 'POST':
+            username = request.POST.get('username', '')
+            lock_key = f'login_lock_{username}'
+
+            if cache.get(lock_key):
+                form = self.get_form()
+                form.add_error(None, 'Too many failed login attempts. Try again in 30 minutes.')
+                return self.render_to_response(self.get_context_data(form=form))
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_invalid(self, form):
+        username = self.request.POST.get('username', '')
+
+        attempts_key = f'login_attempts_{username}'
+        lock_key = f'login_lock_{username}'
+
+        # count failed attempt
+        attempts = cache.get(attempts_key, 0) + 1
+        cache.set(attempts_key, attempts, timeout=1800)
+
+        remaining = 5 - attempts
+
+        # lock after 5 failed attempts
+        if attempts >= 5:
+            cache.set(lock_key, True, timeout=1800)
+            cache.delete(attempts_key)
+            form.add_error(None, 'Too many failed login attempts. Try again in 30 minutes.')
+        else:
+            form.add_error(None, f'Invalid username or password. {remaining} attempts remaining.')
+
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def form_valid(self, form):
+        username = self.request.POST.get('username', '')
+
+        # clear attempts after successful login
+        cache.delete(f'login_attempts_{username}')
+        cache.delete(f'login_lock_{username}')
+
+        return super().form_valid(form)
+    
 @login_required
 @never_cache
 def teams(request):
