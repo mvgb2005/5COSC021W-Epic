@@ -2,7 +2,7 @@
 Software Development Group Project
 
 ## Group members
-Aurouba, Mohul, Samuel, Syed
+Aurouba, Mohul, Samuel, Syed Abbas
 
 
 ## Setup and Run Instructions (PowerShell)
