@@ -10,7 +10,6 @@ from openpyxl import Workbook
 from openpyxl.chart import BarChart, Reference
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from .models import ScheduleMeeting
 
 
 @login_required
@@ -103,12 +102,8 @@ def delete_schedule(request, schedule_id):
     return render(request, 'scheduler/schedule_delete.html', {'meeting': meeting})
 
 
-@login_required
-def schedule_reports(request):
-    # only admin users can view schedule reports
-    if not request.user.is_staff:
-        return render(request, 'admin_only.html')
-
+# filter schedule report data
+def get_filtered_schedule_meetings(request):
     # get report filters
     q = request.GET.get('q') if request.GET.get('q') != None else ''
     schedule_filter = request.GET.get('filter') if request.GET.get('filter') != None else ''
@@ -135,6 +130,18 @@ def schedule_reports(request):
     # filter by date
     if date_filter:
         meetings = meetings.filter(meetingDate=date_filter)
+
+    return meetings, q, schedule_filter, platform_filter, date_filter
+
+
+@login_required
+def schedule_reports(request):
+    # only admin users can view schedule reports
+    if not request.user.is_staff:
+        return render(request, 'admin_only.html')
+
+    # get filtered meetings
+    meetings, q, schedule_filter, platform_filter, date_filter = get_filtered_schedule_meetings(request)
 
     # count meeting types
     upcoming_count = meetings.filter(scheduleType='upcoming').count()
@@ -170,8 +177,8 @@ def export_schedule_excel(request):
     if not request.user.is_staff:
         return render(request, 'admin_only.html')
 
-    # get all meetings
-    meetings = ScheduleMeeting.objects.all().order_by('meetingDate', 'meetingTime')
+    # export only filtered meetings
+    meetings, q, schedule_filter, platform_filter, date_filter = get_filtered_schedule_meetings(request)
 
     # create workbook
     workbook = Workbook()
@@ -229,8 +236,8 @@ def export_schedule_pdf(request):
     if not request.user.is_staff:
         return render(request, 'admin_only.html')
 
-    # get all meetings
-    meetings = ScheduleMeeting.objects.all().order_by('meetingDate', 'meetingTime')
+    # export only filtered meetings
+    meetings, q, schedule_filter, platform_filter, date_filter = get_filtered_schedule_meetings(request)
 
     # create pdf response
     response = HttpResponse(content_type='application/pdf')
