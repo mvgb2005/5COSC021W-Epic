@@ -445,31 +445,29 @@
 
 </div>
 
+    
 <script>
-   // set inactivity time to 5 minutes
+    // set inactivity time to 5 minutes
     let inactivityTime = 300000;
     let logoutTimer;
 
-    // reset timer on user activity
+    // reset timer when user is active
     function resetTimer() {
         clearTimeout(logoutTimer);
 
         logoutTimer = setTimeout(function () {
-            // logout user after inactivity
+            // fully logout then redirect to login
             window.location.href = "/accounts/logout/";
         }, inactivityTime);
     }
 
-    // start timer when page loads
     window.onload = resetTimer;
 
-    // reset timer on activity
     document.onmousemove = resetTimer;
     document.onkeypress = resetTimer;
     document.onclick = resetTimer;
     document.onscroll = resetTimer;
 
-    // reload cached pages when back button is used
     window.onpageshow = function(event) {
         if (event.persisted) {
             window.location.reload();
@@ -477,5 +475,6 @@
     };
 </script>
 
+    
 </body>
 </html>
