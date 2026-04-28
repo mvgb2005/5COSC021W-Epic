@@ -76,8 +76,7 @@ def home(request):
     return render(request, 'home.html')
 
 def user_logout(request):
-    if request.method == 'POST':
-        logout(request)
+    logout(request)
     return redirect('/accounts/login/')
 
 @login_required
