@@ -1,10 +1,17 @@
 from django.urls import path
-from .views import signup, home, user_logout, teams, team_detail, organisation, conversations, chat, start_conversation, hide_conversation, export_excel_report, export_pdf_report, reports_page, export_full_chat_excel, export_full_chat_pdf, LockedLoginView
+from .views import signup, home, user_logout, teams, team_detail, organisation, conversations, chat, start_conversation, hide_conversation, export_excel_report, export_pdf_report, reports_page, export_full_chat_excel, export_full_chat_pdf
+from django.contrib.auth import views as auth_views
+from django.contrib import admin
+from django.urls import path, include
+from django.contrib.auth import views as auth_views
+from . import views
+
+
+
 
 urlpatterns = [
     path('', home, name='home'),
     path('signup/', signup, name='signup'),
-    path('accounts/login/', LockedLoginView.as_view(), name='login'),
     path('logout/', user_logout, name='logout'),
     path('teams/', teams, name='teams'),
     path('teams/<int:team_id>/', team_detail, name='team_detail'),
@@ -18,5 +25,6 @@ urlpatterns = [
     path("reports/pdf/", export_pdf_report, name="export_pdf_report"),
     path("reports/full-chat/excel/", export_full_chat_excel, name="export_full_chat_excel"),
     path("reports/full-chat/pdf/", export_full_chat_pdf, name="export_full_chat_pdf"),
-    
+    path("profile/", views.updateprofile, name="updateprofile"),
+    path('password-reset/', auth_views.PasswordResetView.as_view(template_name='registration/password_reset.html'), name='password_reset'),
     ]
