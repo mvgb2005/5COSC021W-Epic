@@ -5,7 +5,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
-from .forms import SignUpForm
+from .forms import SignUpForm, UserForm
 from .models import *
 from django.http import HttpResponse
 from openpyxl import Workbook
@@ -14,9 +14,6 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.barcharts import VerticalBarChart
-from django.contrib.auth.views import LoginView
-from django.contrib.auth.forms import AuthenticationForm
-from django.core.cache import cache
 
 
 # Creating the helper function for report data
@@ -61,7 +58,7 @@ def get_grouped_chat_data():
     return grouped_data
 
 
-# Create views here.
+# Create your views here.
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -83,68 +80,6 @@ def user_logout(request):
         logout(request)
     return redirect('/accounts/login/')
 
-
-
-# login view with failed password lockout
-
-class LockedLoginView(LoginView):
-    template_name = 'registration/login.html'
-    authentication_form = AuthenticationForm
-
-    def dispatch(self, request, *args, **kwargs):
-        # check lock before password validation
-        if request.method == 'POST':
-            username = request.POST.get('username', '')
-
-            # only lock real user accounts
-            if User.objects.filter(username=username).exists():
-                lock_key = f'login_lock_{username}'
-
-                # block user if account is locked
-                if cache.get(lock_key):
-                    form = self.get_form()
-                    form.add_error(None, 'Too many failed login attempts. Try again in 30 minutes.')
-                    return self.render_to_response(self.get_context_data(form=form))
-
-        return super().dispatch(request, *args, **kwargs)
-
-    def form_invalid(self, form):
-        username = self.request.POST.get('username', '')
-
-        # only count attempts for real users
-        if User.objects.filter(username=username).exists():
-            attempts_key = f'login_attempts_{username}'
-            lock_key = f'login_lock_{username}'
-
-            # count failed attempt
-            attempts = cache.get(attempts_key, 0) + 1
-            cache.set(attempts_key, attempts, timeout=1800)
-
-            remaining = 5 - attempts
-
-            # lock after 5 failed attempts
-            if attempts >= 5:
-                cache.set(lock_key, True, timeout=1800)
-                cache.delete(attempts_key)
-                form.add_error(None, 'Too many failed login attempts. Try again in 30 minutes.')
-            else:
-                form.add_error(None, f'Invalid username or password. {remaining} attempts remaining.')
-
-        else:
-            # generic message for unknown usernames
-            form.add_error(None, 'Invalid username or password.')
-
-        return self.render_to_response(self.get_context_data(form=form))
-
-    def form_valid(self, form):
-        username = self.request.POST.get('username', '')
-
-        # clear attempts after successful login
-        cache.delete(f'login_attempts_{username}')
-        cache.delete(f'login_lock_{username}')
-
-        return super().form_valid(form)
-    
 @login_required
 @never_cache
 def teams(request):
@@ -494,3 +429,22 @@ def export_full_chat_pdf(request):
 
     p.save()
     return response
+
+def updateprofile(request):
+    return render(request, 'accounts/profile.html')
+
+@login_required
+def updateprofile(request):
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user)
+
+        if user_form.is_valid():
+            user_form.save()
+            return redirect('updateprofile')
+
+    else:
+        user_form = UserForm(instance=request.user)
+
+    return render(request, 'accounts/profile.html', {
+        'user_form': user_form
+    })
