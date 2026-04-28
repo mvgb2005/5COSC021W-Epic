@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
-    'scheduler'
 ]
 
 MIDDLEWARE = [
@@ -104,7 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-gb'
+LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
@@ -124,22 +123,6 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
-
-# Auto Logout Function after not using website for a minute 
-# expire session after 5 minutes
-SESSION_COOKIE_AGE = 300
-
-# refresh session on every request
-SESSION_SAVE_EVERY_REQUEST = True
-
-# expire when browser closes
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-
-
-
-# Cache for login lockout (invalid)
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    }
-}
+#Password reset link section
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+#reset email will print in the terminal instead of sending a real email
