@@ -49,9 +49,8 @@
 
     <!-- download report files -->
     <div class="button-group">
-        <a href="{% url 'export_schedule_pdf' %}" class="pdf-button">Download Schedule PDF</a>
-        <a href="{% url 'export_schedule_excel' %}" class="excel-button">Download Schedule Excel</a>
-    </div>
+    <a href="{% url 'export_schedule_pdf' %}?q={{ q }}&date={{ date_filter }}&platform={{ platform_filter }}&filter={{ schedule_filter }}" class="pdf-button">Download Schedule PDF</a>
+    <a href="{% url 'export_schedule_excel' %}?q={{ q }}&date={{ date_filter }}&platform={{ platform_filter }}&filter={{ schedule_filter }}" class="excel-button">Download Schedule Excel</a>
 
     <!-- meetings table -->
     <h2>Filtered Meetings</h2>
