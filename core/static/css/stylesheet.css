@@ -82,7 +82,7 @@ body {
 
 /* main content */
 .content {
-    margin-left: 260px;
+    min-width: 0;
     flex: 1;
     padding: 20px;
 }
@@ -93,12 +93,14 @@ body {
     justify-content: flex-end;
     align-items: center;
     margin-bottom: 20px;
+    min-height: 50px;
 }
 
 /* profile container */
 .profile-container {
     position: relative;
-    display: inline-block;
+    display: flex;
+    align-items: center;
 }
 
 /* profile picture */
@@ -114,9 +116,9 @@ body {
 
 /* dropdown container */
 .profile-menu {
-    position: absolute;
-    top: 0;
-    right: 0;
+    position: relative;
+    top: auto;
+    right: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -451,4 +453,93 @@ body {
     background: #b0c6e6;
     transform: translateY(-2px);
     transition: 0.2s ease;
+}
+
+.notification-wrapper {
+    position: relative;
+}
+
+.notification-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    position: relative;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 10px;
+}
+
+.notification-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 42px;
+    width: 320px;
+    background: white;
+    color: #222;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 0;
+    z-index: 1000;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+.notification-dropdown.show {
+    display: block;
+}
+
+.notification-dropdown h4 {
+    margin: 0;
+    padding: 14px 16px;
+    background: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    font-size: 16px;
+}
+
+.notification-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.notification-item p {
+    margin: 0 0 6px 0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.notification-item small {
+    color: #777;
+    font-size: 12px;
+}
+
+.notification-links {
+    display: flex;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #fafafa;
+}
+
+.notification-links a {
+    flex: 1;
+    text-align: center;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.notification-links a:hover {
+    background: #0056b3;
 }

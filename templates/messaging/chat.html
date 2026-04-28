@@ -73,8 +73,15 @@
         <!-- input -->
         <form method="post" class="chat-input">
             {% csrf_token %}
-            <input type="text" name="content" placeholder="Type a message..." required>
-            <button type="submit">Send</button>
+            
+            <input type="text" name="content" placeholder="Type a message..." value="{% if draft %}{{ draft.content }}{% endif %}" required>
+
+            <!-- Hidden input for draft -->
+            <input type="hidden" name="is_draft" id="is_draft" value="false">
+
+            <!-- Buttons -->
+            <button type="submit" onclick="setDraft(false)">Send</button>
+            <button type="submit" onclick="setDraft(true)">Save Draft</button>
         </form>
 
     </div>

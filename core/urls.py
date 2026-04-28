@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import signup, home, user_logout, teams, team_detail, organisation, conversations, chat, start_conversation, hide_conversation, export_excel_report, export_pdf_report, reports_page, export_full_chat_excel, export_full_chat_pdf, LockedLoginView
+from .views import signup, home, user_logout, teams, team_detail, organisation, conversations, chat, start_conversation, hide_conversation, export_excel_report, export_pdf_report, reports_page, export_full_chat_excel, export_full_chat_pdf, LockedLoginView, drafts_page, edit_draft, delete_draft, mark_notifications_read
 
 urlpatterns = [
     path('', home, name='home'),
@@ -10,6 +10,7 @@ urlpatterns = [
     path('teams/<int:team_id>/', team_detail, name='team_detail'),
     path('organisation/', organisation, name='organisation'),
     path('chat/', conversations, name='inbox'),
+    path("drafts/", drafts_page, name="drafts_page"),
     path('chat/<int:conversation_id>/', chat, name='chat'),
     path('start/<int:user_id>/', start_conversation, name='start_conversation'),
     path('chat/hide/<int:conversation_id>/', hide_conversation, name='hide_conversation'),
@@ -18,5 +19,7 @@ urlpatterns = [
     path("reports/pdf/", export_pdf_report, name="export_pdf_report"),
     path("reports/full-chat/excel/", export_full_chat_excel, name="export_full_chat_excel"),
     path("reports/full-chat/pdf/", export_full_chat_pdf, name="export_full_chat_pdf"),
-    
+    path("drafts/<int:draft_id>/edit/", edit_draft, name="edit_draft"),
+    path("drafts/<int:draft_id>/delete/", delete_draft, name="delete_draft"),
+    path("notifications/read/", mark_notifications_read, name="mark_notifications_read"),
     ]

@@ -20,6 +20,7 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views  # django auth views
 from core.views import LockedLoginView
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),

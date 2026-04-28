@@ -109,6 +109,8 @@ class Message(models.Model):
     content = models.TextField() # message content
     timestamp = models.DateTimeField(auto_now_add=True) # message timestamp
 
+    is_draft = models.BooleanField(default=False)
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.conversation.lastUpdated = self.timestamp
@@ -124,3 +126,12 @@ class Conversation(models.Model):
     def __str__(self):
         return f"Conversation {self.id}"
     
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.CharField(max_length=255)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.message

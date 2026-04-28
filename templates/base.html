@@ -395,6 +395,7 @@
             <a href="/organisation/">Organisation</a>
             <a href="/teams/">Teams</a>
             <a href="/chat/">Inbox</a>
+            <a href="/drafts/">Drafts</a>
             <a href="/schedule/">Schedule</a>
 
         {% if request.user.is_superuser %}
@@ -425,6 +426,36 @@
                         <span class="profile-username">{{ user.username }}</span>
                         <img src="{% static 'images/pfp.png' %}" class="profile-btn">
                     </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+
+                        <!-- Notification Icon -->
+                        <div class="notification-wrapper">
+                            <button type="button" class="notification-btn" onclick="toggleNotifications()">
+                                🔔
+                                {% if unread_notification_count > 0 %}
+                                <span class="notification-badge">{{ unread_notification_count }}</span>
+                                {% endif %}
+                            </button>
+
+                            <div id="notificationDropdown" class="notification-dropdown">
+                                <h4>Notifications</h4>
+
+                                {% for notification in unread_notifications|slice:":5" %}
+                                <div class="notification-item">
+                                    <p>{{ notification.message }}</p>
+                                    <small>{{ notification.created_at|date:"d M Y, H:i" }}</small>
+                                </div>
+                                {% empty %}
+                                <p class="no-notifications">No new notifications</p>
+                                {% endfor %}
+
+                                <div class="notification-links">
+                                    <a href="{% url 'inbox' %}">Inbox</a>
+                                    <a href="/drafts/">Drafts</a>
+                                </div>
+                            </div>
+                        </div>
+
 
                     <form action="/accounts/logout/" method="post">
                         {% csrf_token %}
@@ -474,6 +505,23 @@
         }
     };
 </script>
+
+<script>
+    function toggleNotifications() {
+        document.getElementById("notificationDropdown").classList.toggle("show");
+    }
+</script>
+
+<script>
+    function toggleNotifications() {
+        const dropdown = document.getElementById("notificationDropdown");
+        dropdown.classList.toggle("show");
+
+        // mark as read when opened
+        fetch("/notifications/read/")
+    }
+</script>
+
 
     
 </body>

@@ -17,6 +17,7 @@ from reportlab.graphics.charts.barcharts import VerticalBarChart
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.cache import cache
+from django.http import JsonResponse
 
 
 # Creating the helper function for report data
@@ -212,15 +213,55 @@ def chat(request, conversation_id):
         return redirect('conversations')
     if request.user not in convo.participants.all():
         return redirect('conversations')
-    messages = Message.objects.filter(conversation=convo).order_by('timestamp')
+    messages = Message.objects.filter(
+        conversation=convo,
+        is_draft=False
+    ).order_by('timestamp')
     users = User.objects.exclude(id=request.user.id).order_by('username')
     conversations = Conversation.objects.filter(participants=request.user).exclude(hidden_for=request.user).distinct().order_by('-lastUpdated')
     if request.method == 'POST':
         content = request.POST.get('content')
         if content:
-            Message.objects.create(conversation=convo, sender=request.user, content=content)
+            is_draft = request.POST.get('is_draft') == 'true'
+
+            if is_draft:
+                Message.objects.create(
+                    conversation=convo,
+                    sender=request.user,
+                    content=content,
+                    is_draft=True
+                )
+
+            else:
+                # delete the user's old draft for this chat
+                Message.objects.filter(
+                    conversation=convo,
+                    sender=request.user,
+                    is_draft=True
+                ).delete()
+
+                # create the actual sent message
+                Message.objects.create(
+                    conversation=convo,
+                    sender=request.user,
+                    content=content,
+                    is_draft=False
+                )
+
+                # notify the other person
+                for user in convo.participants.exclude(id=request.user.id):
+                    Notification.objects.create(
+                        user=user,
+                        message=f"{request.user.username} sent you a message"
+                    )
         return redirect('chat', conversation_id=convo.id)
-    return render(request, 'messaging/chat.html', {'conversation': convo,'messages': messages,'users': users,'conversations': conversations})
+    
+    draft = Message.objects.filter(
+        conversation=convo,
+        sender=request.user,
+        is_draft=True
+    ).order_by('-timestamp').first()
+    return render(request, 'messaging/chat.html', {'conversation': convo,'messages': messages,'users': users,'conversations': conversations,'draft': draft,})
 
 def delete_empty_conversations():
     empty_convos = Conversation.objects.filter(messages__isnull=True)
@@ -493,3 +534,52 @@ def export_full_chat_pdf(request):
 
     p.save()
     return response
+
+
+@login_required
+def drafts_page(request):
+    drafts = Message.objects.filter(
+        sender=request.user,
+        is_draft=True
+    ).order_by('-timestamp')
+
+    return render(request, 'messaging/drafts.html', {'drafts': drafts})
+
+
+@login_required
+def edit_draft(request, draft_id):
+    draft = get_object_or_404(
+        Message,
+        id=draft_id,
+        sender=request.user,
+        is_draft=True
+    )
+
+    return redirect('chat', conversation_id=draft.conversation.id)
+
+
+@login_required
+def delete_draft(request, draft_id):
+    draft = get_object_or_404(
+        Message,
+        id=draft_id,
+        sender=request.user,
+        is_draft=True
+    )
+
+    if request.method == "POST":
+        draft.delete()
+
+    return redirect('drafts_page')
+
+@login_required
+def mark_notifications_read(request):
+    request.user.notification_set.filter(is_read=False).update(is_read=True)
+    return JsonResponse({'status': 'ok'})
+
+from django.http import JsonResponse
+
+@login_required
+def mark_notifications_read(request):
+    request.user.notification_set.filter(is_read=False).update(is_read=True)
+    return JsonResponse({'status': 'ok'})

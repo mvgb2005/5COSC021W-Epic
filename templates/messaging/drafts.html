@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div style="max-width:900px; margin:20px auto;">
+    <h1>Your Drafts</h1>
+
+    {% if drafts %}
+    {% for draft in drafts %}
+    <div style="background:#f5f5f5; padding:15px; margin-bottom:15px; border-radius:8px;">
+        <p>{{ draft.content }}</p>
+        <small>Saved: {{ draft.timestamp|date:"d M Y, H:i" }}</small>
+
+        <div style="margin-top:10px;">
+            <a href="{% url 'edit_draft' draft.id %}">Continue Draft</a>
+
+            <form action="{% url 'delete_draft' draft.id %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" onclick="return confirm('Delete this draft?')">
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p>No drafts found.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
