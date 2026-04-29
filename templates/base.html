@@ -424,7 +424,9 @@
 
                     <div class="profile-row">
                         <span class="profile-username">{{ user.username }}</span>
-                        <img src="{% static 'images/pfp.png' %}" class="profile-btn">
+                        <a href="{% url 'updateprofile' %}">
+                            <img src="{% static 'images/pfp.png' %}" class="profile-btn">
+                        </a>
                     </div>
                     <div style="display:flex; align-items:center; gap:10px;">
 
