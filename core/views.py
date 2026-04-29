@@ -5,7 +5,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
-from .forms import SignUpForm
+from .forms import SignUpForm, UserForm
 from .models import *
 from django.http import HttpResponse
 from openpyxl import Workbook
@@ -583,3 +583,14 @@ from django.http import JsonResponse
 def mark_notifications_read(request):
     request.user.notification_set.filter(is_read=False).update(is_read=True)
     return JsonResponse({'status': 'ok'})
+
+@login_required
+def updateprofile(request):
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user)
+        if user_form.is_valid():
+            user_form.save()
+            return redirect('updateprofile')
+    else:
+        user_form = UserForm(instance=request.user)
+    return render(request, 'accounts/profile.html', {'user_form': user_form})
