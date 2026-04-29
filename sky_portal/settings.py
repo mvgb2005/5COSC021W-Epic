@@ -144,3 +144,8 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+PASSWORD_RESET_TIMEOUT = 3600
+DEFAULT_FROM_EMAIL = 'noreply@localhost'
+DOMAIN = '127.0.0.1:8000'
