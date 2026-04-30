@@ -125,10 +125,9 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
-
-# Auto Logout Function after not using website for a minute 
-# expire session after 5 minutes
-SESSION_COOKIE_AGE = 300
+ 
+# expire session after 2 hours
+SESSION_COOKIE_AGE = 7200
 
 # refresh session on every request
 SESSION_SAVE_EVERY_REQUEST = True
@@ -149,3 +148,6 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 PASSWORD_RESET_TIMEOUT = 3600
 DEFAULT_FROM_EMAIL = 'noreply@localhost'
 DOMAIN = '127.0.0.1:8000'
+
+#Prints email in the terminal 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
