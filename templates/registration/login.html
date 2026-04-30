@@ -1,19 +1,30 @@
 {% extends 'registration/reg_base.html' %}
 {% block title %}Login - Sky Portal{% endblock %}
-
 {% block content %}
-    <h2>Login</h2>
-    <form method="post">
+<h2>Login</h2>
 
-        {% csrf_token %}
+<form method="post">
 
-        <!-- show login errors -->
+    {% csrf_token %}
+
+    <!-- show login errors -->
     <div style="color:red; margin-bottom:10px;">
         {{ form.non_field_errors }}
     </div>
 
-        {{ form.as_p }}
-        <button type="submit">Login</button>
-    </form>
-    <p>Don't have an account? <a href="{% url 'signup' %}">Sign up here</a>.</p>
+    {{ form.as_p }}
+
+    <button type="submit">Login</button>
+
+</form>
+
+<!-- forgot password reset link -->
+<p>
+    <a href="{% url 'password_reset' %}">Forgot password?</a>
+</p>
+
+<p>
+    Don't have an account? <a href="{% url 'signup' %}">Sign up here</a>.
+</p>
+
 {% endblock %}
