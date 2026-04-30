@@ -3,7 +3,6 @@
 <html>
 <head>
     <title>{% block title %}Sky Portal{% endblock %}</title>
-</head>
     <style>
         body {
             margin: 0;
@@ -22,6 +21,7 @@
         background-color: #1e1e2f;
         color: white;
         padding: 20px;
+        box-sizing: border-box;
         }
 
         .sidebar h2 {
@@ -44,13 +44,26 @@
         /* main content */
         .content {
             flex: 1;
-            padding: 20px;
+            padding: 40px 60px;
+            display: flex;
+            flex-direction: column;
+            min-width: none;
+        }
+
+        /* page content wrapper */
+        .page-content {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            transform: translateY(-80px);
+            margin-left: 250px;
+            margin-right: auto;
         }
 
         /* topbar */
         .topbar {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
@@ -75,7 +88,7 @@
         /* dropdown container */
         .profile-menu {
             position: absolute;
-            top: 0;
+            top: 45px;
             right: 0;
             display: flex;
             flex-direction: column;
@@ -109,8 +122,8 @@
         }
 
         /* show elements on hover */
-        .profile-container:hover .profile-username, .profile-container:hover .logout-btn {
-            display: inline-block;
+        .profile-container:hover .profile-username, .profile-container:hover .logout-btn, .profile-container:hover .notification-wrapper {
+            display: flex;
         }
 
         /* username */
@@ -373,7 +386,19 @@
             margin: 0 8px;
             white-space: nowrap;
             align-self: flex-end;
-        }    
+        }
+        
+        /* notif dropdown */
+        .notification-wrapper {
+            display: none;
+        }
+        
+
+        .profile-actions {
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }        
     </style>
     
     <link rel="stylesheet" href="{% static 'css/stylesheet.css' %}">
@@ -428,7 +453,7 @@
                             <img src="{% static 'images/pfp.png' %}" class="profile-btn">
                         </a>
                     </div>
-                    <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="profile-actions"></div>
 
                         <!-- Notification Icon -->
                         <div class="notification-wrapper">
@@ -471,8 +496,11 @@
 
         </div>
 
-        {% block content %}
-        {% endblock %}
+        <div class="page-content">
+            {% block content %}
+            {% endblock %}
+        </div>
+
 
     </div>
 
@@ -480,8 +508,8 @@
 
     
 <script>
-    // set inactivity time to 5 minutes
-    let inactivityTime = 300000;
+    // set inactivity time to 2 hours
+    let inactivityTime = 7200000;
     let logoutTimer;
 
     // reset timer when user is active
